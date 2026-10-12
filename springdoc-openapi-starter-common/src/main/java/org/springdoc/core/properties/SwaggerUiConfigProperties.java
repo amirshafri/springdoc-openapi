@@ -105,6 +105,11 @@ public class SwaggerUiConfigProperties extends AbstractSwaggerUiConfigProperties
 	 */
 	private boolean useRootPath;
 
+	/**
+	 * Whether to show a button that downloads all the schemas as one JSON file.
+	 */
+	private boolean schemasDownloadEnabled;
+
 	@Override
 	public void afterPropertiesSet() {
 		if (StringUtils.isEmpty(version)) {
@@ -189,6 +194,24 @@ public class SwaggerUiConfigProperties extends AbstractSwaggerUiConfigProperties
 	 */
 	public void setDisableSwaggerDefaultUrl(boolean disableSwaggerDefaultUrl) {
 		this.disableSwaggerDefaultUrl = disableSwaggerDefaultUrl;
+	}
+
+	/**
+	 * Is schemas download enabled boolean.
+	 *
+	 * @return the boolean
+	 */
+	public boolean isSchemasDownloadEnabled() {
+		return schemasDownloadEnabled;
+	}
+
+	/**
+	 * Sets schemas download enabled.
+	 *
+	 * @param schemasDownloadEnabled the schemas download enabled
+	 */
+	public void setSchemasDownloadEnabled(boolean schemasDownloadEnabled) {
+		this.schemasDownloadEnabled = schemasDownloadEnabled;
 	}
 
 	/**

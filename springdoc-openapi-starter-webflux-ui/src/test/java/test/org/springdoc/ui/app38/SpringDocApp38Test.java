@@ -1,0 +1,59 @@
+/*
+ *
+ *  *
+ *  *  *
+ *  *  *  * Copyright 2019-2026 the original author or authors.
+ *  *  *  *
+ *  *  *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  *  *  * you may not use this file except in compliance with the License.
+ *  *  *  * You may obtain a copy of the License at
+ *  *  *  *
+ *  *  *  *      https://www.apache.org/licenses/LICENSE-2.0
+ *  *  *  *
+ *  *  *  * Unless required by applicable law or agreed to in writing, software
+ *  *  *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  *  *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  *  *  * See the License for the specific language governing permissions and
+ *  *  *  * limitations under the License.
+ *  *  *
+ *  *
+ *
+ *
+ */
+
+package test.org.springdoc.ui.app38;
+
+import org.junit.jupiter.api.Test;
+import org.springdoc.core.utils.Constants;
+import test.org.springdoc.ui.AbstractSpringDocTest;
+
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.reactive.server.EntityExchangeResult;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+/**
+ * Tests the schemas download button.
+ *
+ * @author amirshafri
+ */
+@TestPropertySource(properties = { "springdoc.swagger-ui.schemas-download-enabled=true" })
+public class SpringDocApp38Test extends AbstractSpringDocTest {
+
+	@Test
+	void transformed_index_with_schemas_download() {
+		EntityExchangeResult<byte[]> getResult = webTestClient.get().uri(Constants.SWAGGER_INITIALIZER_URL)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody().returnResult();
+		assertThat(new String(getResult.getResponseBody()))
+				.contains("const SchemasDownloadPlugin = (system) => ({")
+				.contains("JSON.stringify(schemas, null, 2)")
+				.contains("SwaggerUIBundle.plugins.DownloadUrl,\n      SchemasDownloadPlugin");
+	}
+
+	@SpringBootApplication
+	static class SpringDocTestApp {}
+
+}

@@ -65,6 +65,47 @@ public class AbstractSwaggerIndexTransformer {
 	private static final String EDITOR_FOLD_MARKER = "//</editor-fold>";
 
 	/**
+	 * The constant SWAGGER_UI_BUNDLE.
+	 */
+	private static final String SWAGGER_UI_BUNDLE = "window.ui = SwaggerUIBundle({";
+
+	/**
+	 * The constant DOWNLOAD_URL_PLUGIN.
+	 */
+	private static final String DOWNLOAD_URL_PLUGIN = "SwaggerUIBundle.plugins.DownloadUrl";
+
+	/**
+	 * The constant SCHEMAS_DOWNLOAD_PLUGIN.
+	 */
+	private static final String SCHEMAS_DOWNLOAD_PLUGIN = """
+			const SchemasDownloadPlugin = (system) => ({
+			    wrapComponents: {
+			      Models: (Original) => (props) => system.React.createElement("div", null,
+			        system.React.createElement("button", {
+			          className: "btn schemas-download",
+			          onClick: () => {
+			            let spec;
+			            try {
+			              spec = JSON.parse(system.specSelectors.specStr());
+			            } catch (e) {
+			              spec = system.specSelectors.specJson().toJS();
+			            }
+			            const schemas = (spec.components && spec.components.schemas) || {};
+			            const blob = new Blob([JSON.stringify(schemas, null, 2)], { type: "application/json" });
+			            const link = document.createElement("a");
+			            link.href = URL.createObjectURL(blob);
+			            link.download = "schemas.json";
+			            link.click();
+			            URL.revokeObjectURL(link.href);
+			          }
+			        }, "Download schemas"),
+			        system.React.createElement(Original, props))
+			    }
+			  });
+
+			""";
+
+	/**
 	 * The Swagger ui o auth properties.
 	 */
 	protected SwaggerUiOAuthProperties swaggerUiOAuthProperties;
@@ -185,6 +226,9 @@ public class AbstractSwaggerIndexTransformer {
 
 		if (StringUtils.isNotEmpty(swaggerUiConfig.getDocumentTitle()))
 			html = addDocumentTitle(html);
+
+		if (swaggerUiConfig.isSchemasDownloadEnabled())
+			html = addSchemasDownload(html);
 
 		return html;
 	}
@@ -348,6 +392,20 @@ public class AbstractSwaggerIndexTransformer {
 		stringBuilder.append("';\n\n  ");
 		stringBuilder.append(EDITOR_FOLD_MARKER);
 		return html.replace(EDITOR_FOLD_MARKER, stringBuilder.toString());
+	}
+
+	/**
+	 * Add schemas download button.
+	 *
+	 * @param html the html
+	 * @return the string
+	 */
+	protected String addSchemasDownload(String html) {
+		if (!html.contains(SWAGGER_UI_BUNDLE) || !html.contains(DOWNLOAD_URL_PLUGIN)) {
+			return html;
+		}
+		return html.replace(SWAGGER_UI_BUNDLE, SCHEMAS_DOWNLOAD_PLUGIN + "  " + SWAGGER_UI_BUNDLE)
+				.replace(DOWNLOAD_URL_PLUGIN, DOWNLOAD_URL_PLUGIN + ",\n      SchemasDownloadPlugin");
 	}
 
 	/**
